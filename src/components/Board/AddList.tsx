@@ -13,7 +13,7 @@ const AddList = () => {
   const [showForm, setShowForm] = useState(false);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log(data);
+    console.log({ data });
   };
 
   return (
