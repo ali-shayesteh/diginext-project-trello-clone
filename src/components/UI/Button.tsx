@@ -8,7 +8,14 @@ interface ButtonParams {
   type?: "submit";
 }
 const Button = (props: ButtonParams) => (
-  <button {...props} className={clsx("btn", props.className)}>
+  <button
+    {...props}
+    className={clsx(
+      "btn",
+      props.className,
+      props.type === "submit" && "btn-primary"
+    )}
+  >
     {props.children}
   </button>
 );

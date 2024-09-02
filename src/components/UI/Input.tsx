@@ -1,17 +1,24 @@
 import clsx from "clsx";
+import { forwardRef } from "react";
+import { UseFormRegisterReturn } from "react-hook-form";
 
 interface InputProps {
   className?: string;
   placeholder?: string;
-  register?: (name: string) => void | undefined;
+  register?: UseFormRegisterReturn;
 }
 
-const Input = (props: InputProps) => (
-  <input
-    {...props}
-    {...props.register}
-    className={clsx("text-xs w-full px-3 py-2 rounded", props.className)}
-  />
-);
+type RefProps = HTMLInputElement;
+
+const Input = forwardRef<RefProps, InputProps>((props, ref) => {
+  return (
+    <input
+      ref={ref}
+      {...props}
+      {...props.register}
+      className={clsx("text-xs w-full px-3 py-2 rounded", props.className)}
+    />
+  );
+});
 
 export default Input;

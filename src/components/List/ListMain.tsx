@@ -8,8 +8,8 @@ const ListMain = ({ data }: { data: List }) => {
   const { id } = data;
 
   const { data: cards, isLoading: cardLoading } = useQuery({
-    queryKey: ["cards" + id],
-    queryFn: () => fetchData("/api/card/" + id),
+    queryKey: ["list" + id],
+    queryFn: () => fetchData("/api/list/" + id),
   });
 
   if (cardLoading) <>loading...</>;
@@ -22,10 +22,12 @@ const ListMain = ({ data }: { data: List }) => {
         </header>
         <main className="flex flex-col gap-2">
           {cards &&
-            cards.map((card: Card) => <CardMain key={card.id} card={card} />)}
+            cards.cards.map((card: Card) => (
+              <CardMain key={card.id} card={card} />
+            ))}
         </main>
         <footer className="mt-2">
-          <AddCard />
+          <AddCard listId={id} />
         </footer>
       </div>
     </div>

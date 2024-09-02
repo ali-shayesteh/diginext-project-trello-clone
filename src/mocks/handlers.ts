@@ -61,10 +61,12 @@ export const handlers = [
     return HttpResponse.json(boards);
   }),
 
-  http.get("/api/list/:boardId", ({ params }) => {
+  http.get("/api/board/:boardId", ({ params }) => {
     const { boardId } = params;
 
-    const result = lists.filter((l) => l.boardId === Number(boardId));
+    const list = lists.filter((l) => l.boardId === Number(boardId));
+
+    const result = { lists: list };
 
     return HttpResponse.json(result);
   }),
@@ -82,10 +84,24 @@ export const handlers = [
     return HttpResponse.json(newList);
   }),
 
-  http.get("/api/card/:listId", ({ params }) => {
+  http.post("/api/cards", async ({ request }) => {
+    const { title, listId } = (await request.json()) as {
+      title: string;
+      listId: number;
+    };
+
+    const newCard: Card = { id: cards.length + 1, title, listId };
+
+    cards.push(newCard);
+
+    return HttpResponse.json(newCard);
+  }),
+
+  http.get("/api/list/:listId", ({ params }) => {
     const { listId } = params;
 
-    const result = cards.filter((c) => c.listId === Number(listId));
+    const card = cards.filter((c) => c.listId === Number(listId));
+    const result = { cards: card };
 
     return HttpResponse.json(result);
   }),

@@ -3,8 +3,6 @@ import { fetchData } from "../../lib/util";
 import { Board, List } from "../../types";
 import { useMemo, useState } from "react";
 import ListMain from "../List/ListMain";
-import { Plus } from "lucide-react";
-import Button from "../UI/Button";
 import AddList from "./AddList";
 
 const BoardMain = () => {
@@ -16,8 +14,8 @@ const BoardMain = () => {
   const [boardId, setSelected] = useState(1);
 
   const { data: lists, isLoading: listLoading } = useQuery({
-    queryKey: ["lists" + boardId],
-    queryFn: () => fetchData("/api/list/" + boardId),
+    queryKey: ["board" + boardId],
+    queryFn: () => fetchData("/api/board/" + boardId),
   });
 
   const selectedBoard = useMemo(
@@ -30,7 +28,7 @@ const BoardMain = () => {
     <div className="h-full bg-[#92baeb]">
       {
         <>
-          <header className="p-3 bg-white/40 backdrop-blur-sm">
+          <header className="h-14 p-3 bg-white/40 backdrop-blur-sm">
             <h1 className="font-bold text-lg">
               {isLoading ? <>loading...</> : selectedBoard.title}
             </h1>
@@ -39,13 +37,15 @@ const BoardMain = () => {
           {listLoading ? (
             <>loading...</>
           ) : (
-            <div className="p-3">
-              <div className="flex gap-3">
+            <div className="p-3 h-[calc(100%-56px)]">
+              <div className="flex gap-3 overflow-auto h-full pb-3">
                 {lists &&
-                  lists.length > 0 &&
-                  lists.map((l: List) => <ListMain key={l.id} data={l} />)}
+                  lists.lists.length > 0 &&
+                  lists?.lists.map((l: List) => (
+                    <ListMain key={l.id} data={l} />
+                  ))}
                 <div className="w-72">
-                  <AddList />
+                  <AddList {...{ boardId }} />
                 </div>
               </div>
             </div>

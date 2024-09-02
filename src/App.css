@@ -1,3 +1,6 @@
 .btn {
   @apply flex gap-1 items-center text-[#44546f] text-sm leading-6 hover:bg-[#091e4224] py-1.5 px-2 w-full rounded-lg bg-[#ffffff3d] transition-all;
 }
+.btn-primary {
+  @apply bg-[#0c66e4] hover:bg-[#0055cc] w-auto text-white rounded !px-3;
+}
