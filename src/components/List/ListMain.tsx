@@ -3,12 +3,13 @@ import { List, Card } from "../../types";
 import { fetchData } from "../../lib/util";
 import CardMain from "../Card/CardMain";
 import AddCard from "./AddCard";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 const ListMain = ({ data }: { data: List }) => {
-  const { id } = data;
+  const { id, cardsOrder } = data;
 
   const { data: cards, isLoading: cardLoading } = useQuery({
-    queryKey: ["list" + id],
+    queryKey: ["lists", id],
     queryFn: () => fetchData("/api/list/" + id),
   });
 
@@ -20,14 +21,60 @@ const ListMain = ({ data }: { data: List }) => {
         <header className="py-1.5 px-2">
           <h2 className="text-sm">{data.title}</h2>
         </header>
-        <main className="flex flex-col gap-2">
-          {cards &&
-            cards.cards.map((card: Card) => (
-              <CardMain key={card.id} card={card} />
-            ))}
+        <main className="">
+          <Droppable
+            droppableId={"list-" + id}
+            type="CARD"
+            direction="vertical"
+          >
+            {(provided) => (
+              <div className="min-h-1">
+                <div
+                  className="flex flex-col gap-3 min-h-1"
+                  // style={{
+                  //   height:
+                  //     cardsOrder.length > 0
+                  //       ? cardsOrder.length * 52 - 12
+                  //       : "auto",
+                  // }}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {/* Map through listsOrder to render each list */}
+                  {cards &&
+                    cardsOrder.length > 0 &&
+                    cardsOrder.map((cardId: number, index: number) => {
+                      const card = cards.find((c: Card) => c.id === cardId);
+
+                      return (
+                        card && (
+                          <Draggable
+                            draggableId={"card" + card.id}
+                            key={card.id}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                              >
+                                <div {...provided.dragHandleProps}>
+                                  <CardMain card={card} />
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        )
+                      );
+                    })}
+                </div>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </main>
         <footer className="mt-2">
-          <AddCard listId={id} />
+          <AddCard listId={id} boardId={data.boardId} />
         </footer>
       </div>
     </div>

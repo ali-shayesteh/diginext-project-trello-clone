@@ -26,7 +26,7 @@ const AddList = ({ boardId }: AddListType) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["board" + boardId],
+        queryKey: ["boards", boardId],
       });
       // setShowForm(false);
       reset();
@@ -34,7 +34,7 @@ const AddList = ({ boardId }: AddListType) => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const newList = { ...data, boardId };
+    const newList = { ...data, boardId, cardsOrder: [] };
 
     mutation.mutate(newList);
   };

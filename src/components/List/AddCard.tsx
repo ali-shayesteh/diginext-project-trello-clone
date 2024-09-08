@@ -11,9 +11,10 @@ type FormValues = {
 };
 type AddCardType = {
   listId: number;
+  boardId: number;
 };
 
-const AddCard = ({ listId }: AddCardType) => {
+const AddCard = ({ listId, boardId }: AddCardType) => {
   const queryClient = useQueryClient();
 
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +28,11 @@ const AddCard = ({ listId }: AddCardType) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["list" + listId],
+        queryKey: ["boards", boardId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["lists", listId],
       });
       resetField("title", {
         defaultValue: "",
