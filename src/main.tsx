@@ -18,7 +18,8 @@ async function enableMocking() {
 
 const queryClient = new QueryClient();
 
-await enableMocking().then(() => {
+(async () => {
+  await enableMocking();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -26,4 +27,4 @@ await enableMocking().then(() => {
       </QueryClientProvider>
     </StrictMode>
   );
-});
+})();
