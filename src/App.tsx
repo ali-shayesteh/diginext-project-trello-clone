@@ -1,13 +1,10 @@
-import BoardMain from "./components/Board/BoardMain";
-import DataProvider from "./context/DataContext";
+import { BoardPage } from "./pages/board/ui/boardPage";
 import "./App.css";
 
 function App() {
   return (
     <main className="h-screen w-screen overflow-hidden">
-      <DataProvider>
-        <BoardMain />
-      </DataProvider>
+      <BoardPage />
     </main>
   );
 }

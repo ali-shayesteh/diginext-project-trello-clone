@@ -1,10 +1,10 @@
 import { Plus, X } from "lucide-react";
-import Button from "../UI/Button";
+import Button from "../../../shared/ui/button";
 import { useEffect, useRef, useState } from "react";
-import Input from "../UI/Input";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { appAxios } from "../../lib/util";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { List } from "../../../config/types";
+import { useBoardDataCreateList } from "../api/useBoardData";
+import Input from "../../../shared/ui/Input";
 
 type FormValues = {
   title: string;
@@ -14,29 +14,18 @@ type AddListType = {
 };
 
 const AddList = ({ boardId }: AddListType) => {
-  const queryClient = useQueryClient();
-
   const { register, handleSubmit, reset, setFocus } = useForm<FormValues>();
 
   const [showForm, setShowForm] = useState(false);
 
-  const mutation = useMutation({
-    mutationFn: (newList: { title: string; boardId: number }) => {
-      return appAxios.post("/api/lists", newList);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["boards", boardId],
-      });
-      // setShowForm(false);
-      reset();
-    },
-  });
+  const onListCreateSuccess = () => reset();
+
+  const createList = useBoardDataCreateList(boardId, onListCreateSuccess);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const newList = { ...data, boardId, cardsOrder: [] };
+    const newList: List = { ...data, boardId, cardsOrder: [] };
 
-    mutation.mutate(newList);
+    createList(newList);
   };
 
   useEffect(() => {

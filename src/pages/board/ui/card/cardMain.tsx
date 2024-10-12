@@ -1,4 +1,4 @@
-import { Card } from "../../types";
+import { Card } from "../../../../config/types";
 
 const CardMain = ({ card }: { card: Card }) => (
   <div className="rounded-lg bg-white shadow text-xs p-3">

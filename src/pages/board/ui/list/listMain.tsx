@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { List, Card } from "../../types";
-import { fetchData } from "../../lib/util";
-import CardMain from "../Card/CardMain";
-import AddCard from "./AddCard";
+import { List, Card } from "../../../../config/types";
+import { fetchData } from "../../../../shared/api/apiService";
+import CardMain from "../card/cardMain";
+import AddCard from "./addCard";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 
 const ListMain = ({ data }: { data: List }) => {

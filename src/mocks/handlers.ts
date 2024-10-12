@@ -1,26 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { Board, Card, List } from "../types";
-
-const boardsInit: Board[] = [
-  {
-    id: 1,
-    title: "DigiNext Project",
-    listsOrder: [2, 1, 3],
-  },
-  {
-    id: 2,
-    title: "DigiNext Project 2",
-    listsOrder: [4],
-  },
-];
-
-const boardStorage = localStorage.getItem("boards");
-
-if (!boardStorage) {
-  localStorage.setItem("boards", JSON.stringify(boardsInit));
-}
-
-const boards = boardStorage !== null ? JSON.parse(boardStorage) : boardsInit;
+import { Board, Card, List } from "../config/types";
 
 const listsInit: List[] = [
   {
@@ -56,6 +35,29 @@ if (!listStorage) {
 }
 
 const lists = listStorage !== null ? JSON.parse(listStorage) : listsInit;
+
+const boardsInit: Board[] = [
+  {
+    id: 1,
+    title: "DigiNext Project",
+    listsOrder: [2, 1, 3],
+    lists: listsInit.filter((l) => l.boardId === 1),
+  },
+  {
+    id: 2,
+    title: "DigiNext Project 2",
+    listsOrder: [4],
+    lists: listsInit.filter((l) => l.boardId === 2),
+  },
+];
+
+const boardStorage = localStorage.getItem("boards");
+
+if (!boardStorage) {
+  localStorage.setItem("boards", JSON.stringify(boardsInit));
+}
+
+const boards = boardStorage !== null ? JSON.parse(boardStorage) : boardsInit;
 
 const cardsInit: Card[] = [
   {
@@ -99,7 +101,12 @@ export const handlers = [
 
   http.post("/api/boards", async ({ request }) => {
     const { title } = (await request.json()) as { title: string };
-    const newBoard: Board = { id: boards.length + 1, title, listsOrder: [] };
+    const newBoard: Board = {
+      id: boards.length + 1,
+      title,
+      listsOrder: [],
+      lists: [],
+    };
     boards.push(newBoard);
 
     localStorage.setItem("boards", JSON.stringify(boards));

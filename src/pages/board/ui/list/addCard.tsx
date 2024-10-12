@@ -1,10 +1,10 @@
 import { Plus, X } from "lucide-react";
-import Button from "../UI/Button";
+import Button from "../../../../shared/ui/button";
 import { useEffect, useRef, useState } from "react";
-import TextArea from "../UI/TextArea";
+import TextArea from "../../../../shared/ui/textArea";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { appAxios } from "../../lib/util";
+import { axiosInstance } from "../../../../shared/api/apiService";
 
 type FormValues = {
   title: string;
@@ -24,11 +24,11 @@ const AddCard = ({ listId, boardId }: AddCardType) => {
 
   const mutation = useMutation({
     mutationFn: (newCard: { title: string; listId: number }) => {
-      return appAxios.post("/api/cards", newCard);
+      return axiosInstance.post("/api/cards", newCard);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["boards", boardId],
+        queryKey: ["/api/boards/" + boardId],
       });
 
       queryClient.invalidateQueries({

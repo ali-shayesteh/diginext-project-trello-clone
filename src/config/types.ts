@@ -1,19 +1,20 @@
 export interface Card {
-  id: number;
+  id?: number;
   title: string;
   desciption?: string;
   listId: number;
 }
 
 export interface List {
-  id: number;
+  id?: number;
   title: string;
   boardId: number;
   cardsOrder: number[];
 }
 
 export interface Board {
-  id: number;
+  id?: number;
   title: string;
   listsOrder: number[];
+  lists: List[];
 }
