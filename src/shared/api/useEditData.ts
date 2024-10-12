@@ -8,15 +8,15 @@ interface EditDataVariables<T> {
 
 export default function useEditData<T>(
   url: string,
-  onSuccess?: (variables: EditDataVariables<T>) => void,
+  onSuccess?: (variables: EditDataVariables<T>, data: T) => void,
   onMutate?: (variables: {
     id: number;
     newData: T;
   }) => Promise<{ previous: T | undefined }>,
   onError?: (
-    error: Error,
-    variables: EditDataVariables<T>,
-    context: { previous: T | undefined } | undefined
+    context: { previous: T | undefined } | undefined,
+    error?: Error,
+    variables?: EditDataVariables<T>
   ) => void,
   onSettled?: () => void
 ) {
@@ -26,7 +26,7 @@ export default function useEditData<T>(
 
     onSuccess: (data, variables) => {
       if (onSuccess) {
-        onSuccess(variables);
+        onSuccess(variables, data);
       }
     },
 
@@ -38,7 +38,7 @@ export default function useEditData<T>(
     },
     onError: (error, variables, context) => {
       if (onError) {
-        onError(error, variables, context);
+        onError(context, error, variables);
       }
     },
     onSettled: () => {

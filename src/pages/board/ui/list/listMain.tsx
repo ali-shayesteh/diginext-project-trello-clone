@@ -74,7 +74,7 @@ const ListMain = ({ data }: { data: List }) => {
           </Droppable>
         </main>
         <footer className="mt-2">
-          <AddCard listId={id} boardId={data.boardId} />
+          {id && data && <AddCard listId={id} boardId={data.boardId} />}
         </footer>
       </div>
     </div>

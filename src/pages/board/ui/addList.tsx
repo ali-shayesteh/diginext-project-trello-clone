@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { List } from "../../../config/types";
 import { useBoardDataCreateList } from "../api/useBoardData";
-import Input from "../../../shared/ui/Input";
+import Input from "../../../shared/ui/input";
 
 type FormValues = {
   title: string;

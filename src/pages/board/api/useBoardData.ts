@@ -23,8 +23,6 @@ export default function useBoardData(boardId: number) {
   };
 
   const mutateBoardError = (
-    error: Error,
-    variables: BoardVariables,
     context: { previous: Board | undefined } | undefined
   ) => {
     if (context)
