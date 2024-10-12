@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "./apiService";
 
-function useGetData<T>(url: string): {
+export function useGetData<T>(url: string): {
   loading: boolean;
   data?: T;
   refetchData: () => void;
 } {
   const query = useQuery<T, Error>({
     queryKey: [url],
-    queryFn: () => getData(url),
+    queryFn: () => apiService.getData(url),
   });
 
   const loading = query.isLoading || query.isRefetching || query.isPending;
@@ -20,5 +20,3 @@ function useGetData<T>(url: string): {
 
   return { loading, data, refetchData };
 }
-
-export default useGetData;

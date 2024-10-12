@@ -1,17 +1,22 @@
-import { QueryFunctionContext, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiService } from "./apiService";
+
+interface EditDataVariables<T> {
+  id: number;
+  newData: T;
+}
 
 export default function useEditData<T>(
   url: string,
-  onSuccess?: (variables: { id: number; newData: T }) => void,
+  onSuccess?: (variables: EditDataVariables<T>) => void,
   onMutate?: (variables: {
     id: number;
     newData: T;
   }) => Promise<{ previous: T | undefined }>,
   onError?: (
     error: Error,
-    variables: { id: number; newData: T },
-    context: QueryFunctionContext
+    variables: EditDataVariables<T>,
+    context: { previous: T | undefined } | undefined
   ) => void,
   onSettled?: () => void
 ) {
@@ -25,10 +30,11 @@ export default function useEditData<T>(
       }
     },
 
-    onMutate: (variables) => {
+    onMutate: async (variables) => {
       if (onMutate) {
-        onMutate(variables);
+        return (await onMutate(variables)) || { previous: undefined };
       }
+      return { previous: undefined };
     },
     onError: (error, variables, context) => {
       if (onError) {

@@ -1,96 +1,48 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../../../shared/api/apiService";
+import { useQueryClient } from "@tanstack/react-query";
 import { Board, List } from "../../../config/types";
 import useCreateData from "../../../shared/api/useCreateData";
 import useEditData from "../../../shared/api/useEditData";
 
+type BoardVariables = { id: number; newData: Board };
+
 export default function useBoardData(boardId: number) {
   const queryClient = useQueryClient();
 
-  type boardVariables =  {id: number, newData: Board}
+  const mutateBoardMutate = async (variables: BoardVariables) => {
+    await queryClient.cancelQueries({ queryKey: ["/api/boards/" + boardId] });
 
-  const mutateBoardMutate = async (variables : boardVariables) => {
+    const previous: Board | undefined = queryClient.getQueryData([
+      "/api/boards/" + boardId,
+    ]);
+    queryClient.setQueryData(
+      ["/api/boards/" + boardId],
+      () => variables.newData
+    );
 
-      await queryClient.cancelQueries({ queryKey: ["/api/boards/" + boardId] });
+    return { previous };
+  };
 
-      const previous : Board | undefined = queryClient.getQueryData([
-        "/api/boards/" + boardId,
-      ]);
-      queryClient.setQueryData(["/api/boards/" + boardId], () => variables.newData);
+  const mutateBoardError = (
+    error: Error,
+    variables: BoardVariables,
+    context: { previous: Board | undefined } | undefined
+  ) => {
+    if (context)
+      queryClient.setQueryData(["/api/boards/" + boardId], context.previous);
+  };
 
-      return { previous };
-    }
+  // Always refetch after error or success:
+  const mutateBoardSettled = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/boards/" + boardId] });
+  };
 
-
-    const mutateBoardError = (error: Error, variables : boardVariables, context : (previous: Board) => void| undefined) => {
-      if (context)
-        queryClient.setQueryData(
-          ["/api/boards/" + boardId],
-          context.previous
-        );
-    }
-
-  //   // Always refetch after error or success:
-  //   onSettled: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["/api/boards/" + boardId] });
-  //   },
-  
-
-
-  const mutateBoard = useEditData<Board>("api/boards/", () => null, mutateBoardMutate, mutateBoardError )
-
-  // const mutateBoard = useMutation({
-  //   mutationFn: ({
-  //     listsOrder,
-  //     title,
-  //     lists,
-  //   }: {
-  //     listsOrder?: number[];
-  //     title?: string;
-  //     lists?: List[];
-  //   }) => {
-  //     return axiosInstance.put("api/boards/" + boardId, {
-  //       listsOrder,
-  //       title,
-  //       lists,
-  //     });
-  //   },
-  //   // onSuccess: () => {
-  //   //   // ✅ refetch the comments list for our blog post
-  //   //   queryClient.invalidateQueries({
-  //   //     queryKey: ["boards", boardId],
-  //   //   });
-  //   // },
-  //   onMutate: async (newBoard) => {
-  //     // Cancel any outgoing refetches
-  //     // (so they don't overwrite our optimistic update)
-  //     await queryClient.cancelQueries({ queryKey: ["/api/boards/" + boardId] });
-
-  //     // Snapshot the previous value
-  //     const previousBoards = queryClient.getQueryData([
-  //       "/api/boards/" + boardId,
-  //     ]);
-
-  //     // Optimistically update to the new value
-  //     queryClient.setQueryData(["/api/boards/" + boardId], () => newBoard);
-
-  //     // Return a context object with the snapshotted value
-  //     return { previousBoards };
-  //   },
-  //   // If the mutation fails,
-  //   // use the context returned from onMutate to roll back
-  //   onError: (err, newBoard, context) => {
-  //     if (context)
-  //       queryClient.setQueryData(
-  //         ["/api/boards/" + boardId],
-  //         context.previousBoards
-  //       );
-  //   },
-  //   // Always refetch after error or success:
-  //   onSettled: () => {
-  //     queryClient.invalidateQueries({ queryKey: ["/api/boards/" + boardId] });
-  //   },
-  // });
+  const mutateBoard = useEditData<Board>(
+    "api/boards/",
+    () => null,
+    mutateBoardMutate,
+    mutateBoardError,
+    mutateBoardSettled
+  );
 
   const mutateListSuccess = (variables: { id: number; newData: List }) => {
     queryClient.invalidateQueries({
@@ -101,10 +53,7 @@ export default function useBoardData(boardId: number) {
     });
   };
 
-  const mutateList = useEditData<List>(
-    "api/lists/",
-    mutateListSuccess
-  );
+  const mutateList = useEditData<List>("api/lists/", mutateListSuccess);
 
   const mutateCardSuccess = (variables: {
     id: number;
@@ -119,11 +68,19 @@ export default function useBoardData(boardId: number) {
     mutateCardSuccess
   );
 
-  const moveList = (reorderedLists: number[], title: string, lists: List[]) => {
-    mutateBoard.mutate({
-      listsOrder: reorderedLists,
-      title,
-      lists,
+  const moveList = (
+    id: number,
+    reorderedLists: number[],
+    title: string,
+    lists: List[]
+  ) => {
+    mutateBoard({
+      id,
+      newData: {
+        listsOrder: reorderedLists,
+        title,
+        lists,
+      },
     });
   };
 
@@ -154,9 +111,6 @@ export default function useBoardData(boardId: number) {
     editCard,
     moveCard,
     moveList,
-    mutateBoard,
-    mutateList,
-    mutateCard,
     boardId,
   };
 }

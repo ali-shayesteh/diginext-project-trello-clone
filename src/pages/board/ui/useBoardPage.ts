@@ -13,7 +13,7 @@ export default function useBoardPage(boardId: number) {
     const [removedItem] = reorderedLists.splice(sourceIndex, 1);
     reorderedLists.splice(destinationIndex, 0, removedItem);
 
-    moveList(reorderedLists, data?.title, data?.lists);
+    moveList(boardId, reorderedLists, data?.title || "", data?.lists || []);
   };
 
   const handleCardMoveBetweenLists = (
