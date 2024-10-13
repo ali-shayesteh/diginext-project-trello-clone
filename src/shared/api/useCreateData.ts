@@ -7,7 +7,7 @@ export default function useCreateData<T>(
   onError: () => void
 ) {
   const mutateData = useMutation({
-    mutationFn: (newData: T) => apiService.createData(url, newData),
+    mutationFn: (newData: Partial<T>) => apiService.createData(url, newData),
     onSuccess: () => {
       if (onSuccess) {
         onSuccess();

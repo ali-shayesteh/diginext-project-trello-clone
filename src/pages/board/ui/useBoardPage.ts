@@ -1,19 +1,24 @@
 import { OnDragEndResponder } from "@hello-pangea/dnd";
-import { Board } from "../../../config/types";
+import { Board, List } from "../../../config/types";
 import { useGetData } from "../../../shared/api/useGetData";
 import useBoardData from "../api/useBoardData";
+
+interface BoardDataInterface extends Board {
+  lists: List[];
+}
 
 export default function useBoardPage(boardId: number) {
   const { moveList, editCard, moveCard } = useBoardData(boardId);
 
-  const { data, loading } = useGetData<Board>("/api/boards/" + boardId);
+  const { data, loading } = useGetData<BoardDataInterface>(
+    "/api/boards/" + boardId
+  );
 
   const handleListMove = (sourceIndex: number, destinationIndex: number) => {
-    const reorderedLists = data ? [...data.listsOrder] : [];
-    const [removedItem] = reorderedLists.splice(sourceIndex, 1);
-    reorderedLists.splice(destinationIndex, 0, removedItem);
-
-    moveList(boardId, reorderedLists, data?.title || "", data?.lists || []);
+    // const reorderedLists = data ? [...data.listsOrder] : [];
+    // const [removedItem] = reorderedLists.splice(sourceIndex, 1);
+    // reorderedLists.splice(destinationIndex, 0, removedItem);
+    // moveList(boardId, reorderedLists, data?.title || "", data?.lists || []);
   };
 
   const handleCardMoveBetweenLists = (
@@ -28,19 +33,14 @@ export default function useBoardPage(boardId: number) {
 
     if (!srcTargetList || !destTargetList) return;
 
-    const [removedItem] = srcTargetList.cardsOrder.splice(sourceIndex, 1);
-    destTargetList.cardsOrder.splice(destinationIndex, 0, removedItem);
+    // const [removedItem] = srcTargetList.cardsOrder.splice(sourceIndex, 1);
+    // destTargetList.cardsOrder.splice(destinationIndex, 0, removedItem);
 
-    editCard(Number(removedItem), destListId);
+    // editCard(Number(removedItem), destListId);
 
-    moveCard(srcListId, srcTargetList.title, srcTargetList.cardsOrder, boardId);
+    // moveCard(srcListId, srcTargetList.title, srcTargetList.cardsOrder, boardId);
 
-    moveCard(
-      destListId,
-      destTargetList.title,
-      destTargetList.cardsOrder,
-      boardId
-    );
+    moveCard(destListId, destTargetList.title, boardId);
   };
 
   const handleCardMove = (
@@ -53,10 +53,10 @@ export default function useBoardPage(boardId: number) {
 
     if (!targetList) return;
 
-    const [removedItem] = targetList.cardsOrder.splice(sourceIndex, 1);
-    targetList.cardsOrder.splice(destinationIndex, 0, removedItem);
+    // const [removedItem] = targetList.cardsOrder.splice(sourceIndex, 1);
+    // targetList.cardsOrder.splice(destinationIndex, 0, removedItem);
 
-    moveCard(listId, targetList.title, targetList.cardsOrder, boardId);
+    // moveCard(listId, targetList.title, targetList.cardsOrder, boardId);
   };
 
   const handleDragDrop: OnDragEndResponder = (results) => {

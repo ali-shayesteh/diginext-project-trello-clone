@@ -23,7 +23,7 @@ const AddList = ({ boardId }: AddListType) => {
   const createList = useBoardDataCreateList(boardId, onListCreateSuccess);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const newList: List = { ...data, boardId, cardsOrder: [] };
+    const newList = { ...data, board_id: boardId };
 
     createList(newList);
   };

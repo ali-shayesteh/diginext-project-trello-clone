@@ -1,19 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
 import { List, Card } from "../../../../config/types";
-import { fetchData } from "../../../../shared/api/apiService";
 import CardMain from "../card/cardMain";
 import AddCard from "./addCard";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { useGetData } from "../../../../shared/api/useGetData";
+
+interface ListData extends List {
+  cards: Card[];
+}
 
 const ListMain = ({ data }: { data: List }) => {
-  const { id, cardsOrder } = data;
+  const { id } = data;
 
-  const { data: cards, isLoading: cardLoading } = useQuery({
-    queryKey: ["lists", id],
-    queryFn: () => fetchData("/api/list/" + id),
-  });
+  const { data: list, loading } = useGetData<ListData>("/api/lists/" + id);
 
-  if (cardLoading) <>loading...</>;
+  if (loading) <>loading...</>;
 
   return (
     <div>
@@ -41,10 +41,10 @@ const ListMain = ({ data }: { data: List }) => {
                   ref={provided.innerRef}
                 >
                   {/* Map through listsOrder to render each list */}
-                  {cards &&
-                    cardsOrder.length > 0 &&
-                    cardsOrder.map((cardId: number, index: number) => {
-                      const card = cards.find((c: Card) => c.id === cardId);
+                  {list &&
+                    list.cards.length > 0 &&
+                    list.cards.map((card: Card, index: number) => {
+                      // const card = cards.find((c: Card) => c.id === cardId);
 
                       return (
                         card && (
@@ -74,7 +74,7 @@ const ListMain = ({ data }: { data: List }) => {
           </Droppable>
         </main>
         <footer className="mt-2">
-          {id && data && <AddCard listId={id} boardId={data.boardId} />}
+          {id && data && <AddCard listId={id} boardId={data.id} />}
         </footer>
       </div>
     </div>

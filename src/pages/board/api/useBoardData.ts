@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Board, List } from "../../../config/types";
+import { Board, Card, List } from "../../../config/types";
 import useCreateData from "../../../shared/api/useCreateData";
 import useEditData from "../../../shared/api/useEditData";
 
@@ -82,18 +82,12 @@ export default function useBoardData(boardId: number) {
     });
   };
 
-  const moveCard = (
-    id: number,
-    title: string,
-    cardsOrder: number[],
-    boardId: number
-  ) => {
+  const moveCard = (id: number, title: string, boardId: number) => {
     mutateList({
       id,
       newData: {
         title,
-        cardsOrder,
-        boardId,
+        board_id: boardId,
       },
     });
   };
@@ -122,6 +116,31 @@ export function useBoardDataCreateList(boardId: number, onSuccess: () => void) {
       onSuccess();
       queryClient.invalidateQueries({
         queryKey: ["/api/boards/" + boardId],
+      });
+    },
+    () => null
+  );
+
+  return createList.mutate;
+}
+
+export function useBoardDataCreateCard(
+  boardId: number,
+  listId: number,
+  onSuccess: () => void
+) {
+  const queryClient = useQueryClient();
+
+  const createList = useCreateData<Card>(
+    "/api/cards",
+    () => {
+      onSuccess();
+      queryClient.invalidateQueries({
+        queryKey: ["/api/boards/" + boardId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["/api/lists/" + listId],
       });
     },
     () => null

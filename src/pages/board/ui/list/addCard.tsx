@@ -3,8 +3,7 @@ import Button from "../../../../shared/ui/button";
 import { useEffect, useRef, useState } from "react";
 import TextArea from "../../../../shared/ui/textArea";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { axiosInstance } from "../../../../shared/api/apiService";
+import { useBoardDataCreateCard } from "../../api/useBoardData";
 
 type FormValues = {
   title: string;
@@ -15,35 +14,23 @@ type AddCardType = {
 };
 
 const AddCard = ({ listId, boardId }: AddCardType) => {
-  const queryClient = useQueryClient();
-
   const [showForm, setShowForm] = useState(false);
 
   const { register, handleSubmit, resetField, setFocus } =
     useForm<FormValues>();
 
-  const mutation = useMutation({
-    mutationFn: (newCard: { title: string; listId: number }) => {
-      return axiosInstance.post("/api/cards", newCard);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["/api/boards/" + boardId],
-      });
+  const createCardSuccess = () => {
+    resetField("title", {
+      defaultValue: "",
+    });
+    setFocus("title");
+  };
 
-      queryClient.invalidateQueries({
-        queryKey: ["lists", listId],
-      });
-      resetField("title", {
-        defaultValue: "",
-      });
-      setFocus("title");
-    },
-  });
+  const createCard = useBoardDataCreateCard(boardId, listId, createCardSuccess);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const newCard = { ...data, listId };
-    mutation.mutate(newCard);
+    const newCard = { ...data, list_id: listId };
+    createCard(newCard);
   };
 
   const handleShowForm = () => {

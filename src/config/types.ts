@@ -1,20 +1,25 @@
-export interface Card {
-  id?: number;
+export interface Board {
+  id: number;
   title: string;
-  desciption?: string;
-  listId: number;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface List {
-  id?: number;
+  id: number;
+  board_id: number;
   title: string;
-  boardId: number;
-  cardsOrder: number[];
+  position: number;
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface Board {
-  id?: number;
+export interface Card {
+  id: number;
+  list_id: number;
   title: string;
-  listsOrder: number[];
-  lists: List[];
+  description: string;
+  position: number;
+  created_at: Date;
+  updated_at: Date;
 }

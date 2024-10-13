@@ -43,37 +43,31 @@ export const BoardPage = () => {
                       >
                         {/* Map through listsOrder to render each list */}
 
-                        {boardData.listsOrder &&
-                          boardData.listsOrder.length > 0 &&
-                          boardData.listsOrder.map(
-                            (listId: number, index: number) => {
-                              const list: List | undefined =
-                                boardData.lists.find(
-                                  (l: List) => l.id === listId
-                                );
-                              if (!list) {
-                                return <>Not Found</>;
-                              }
-                              return (
-                                <Draggable
-                                  draggableId={"list" + list.id}
-                                  key={list.id}
-                                  index={index}
-                                >
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                    >
-                                      <div {...provided.dragHandleProps}>
-                                        <ListMain key={list.id} data={list} />
-                                      </div>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              );
+                        {boardData.lists &&
+                          boardData.lists.length > 0 &&
+                          boardData.lists.map((list: List, index: number) => {
+                            if (!list) {
+                              return <>Not Found</>;
                             }
-                          )}
+                            return (
+                              <Draggable
+                                draggableId={"list" + list.id}
+                                key={list.id}
+                                index={index}
+                              >
+                                {(provided) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                  >
+                                    <div {...provided.dragHandleProps}>
+                                      <ListMain key={list.id} data={list} />
+                                    </div>
+                                  </div>
+                                )}
+                              </Draggable>
+                            );
+                          })}
                         {provided.placeholder}
                       </div>
                     )}
