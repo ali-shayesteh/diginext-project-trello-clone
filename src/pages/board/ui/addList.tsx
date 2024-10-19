@@ -2,7 +2,6 @@ import { Plus, X } from "lucide-react";
 import Button from "../../../shared/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { List } from "../../../config/types";
 import { useBoardDataCreateList } from "../api/useBoardData";
 import Input from "../../../shared/ui/input";
 
@@ -25,7 +24,7 @@ const AddList = ({ boardId }: AddListType) => {
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     const newList = { ...data, board_id: boardId };
 
-    createList(newList);
+    createList({ data: newList });
   };
 
   useEffect(() => {

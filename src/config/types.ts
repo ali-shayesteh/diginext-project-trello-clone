@@ -1,17 +1,14 @@
 export interface Board {
   id: number;
   title: string;
-  created_at: Date;
-  updated_at: Date;
+  listsOrder: number[];
 }
 
 export interface List {
   id: number;
   board_id: number;
   title: string;
-  position: number;
-  created_at: Date;
-  updated_at: Date;
+  cardsOrder: number[];
 }
 
 export interface Card {
@@ -19,7 +16,4 @@ export interface Card {
   list_id: number;
   title: string;
   description: string;
-  position: number;
-  created_at: Date;
-  updated_at: Date;
 }

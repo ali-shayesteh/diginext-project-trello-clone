@@ -1,46 +1,44 @@
 import { OnDragEndResponder } from "@hello-pangea/dnd";
 import { Board, List } from "../../../config/types";
 import { useGetData } from "../../../shared/api/useGetData";
-import useBoardData from "../api/useBoardData";
-
-interface BoardDataInterface extends Board {
-  lists: List[];
-}
+import useBoardData, { useBoardDataEditList } from "../api/useBoardData";
 
 export default function useBoardPage(boardId: number) {
-  const { moveList, editCard, moveCard } = useBoardData(boardId);
+  const { editBoard } = useBoardData(boardId);
 
-  const { data, loading } = useGetData<BoardDataInterface>(
-    "/api/boards/" + boardId
+  const editList = useBoardDataEditList(() => null);
+
+  const { data, loading } = useGetData<Board>("/api/boards/" + boardId);
+
+  const { data: lists, loading: listsLoading } = useGetData<List[]>(
+    "/api/boards/" + boardId + "/lists"
   );
 
   const handleListMove = (sourceIndex: number, destinationIndex: number) => {
-    // const reorderedLists = data ? [...data.listsOrder] : [];
-    // const [removedItem] = reorderedLists.splice(sourceIndex, 1);
-    // reorderedLists.splice(destinationIndex, 0, removedItem);
-    // moveList(boardId, reorderedLists, data?.title || "", data?.lists || []);
+    if (!data) return;
+
+    const temp = data?.listsOrder[sourceIndex];
+
+    data.listsOrder[sourceIndex] = data.listsOrder[destinationIndex];
+    data.listsOrder[destinationIndex] = temp;
+
+    editBoard({ listsOrder: data.listsOrder });
   };
 
   const handleCardMoveBetweenLists = (
-    sourceIndex: number,
-    destinationIndex: number,
     srcListId: number,
     destListId: number
   ) => {
-    const reorderedLists = data ? [...data.lists] : [];
-    const srcTargetList = reorderedLists.find((l) => l.id === srcListId);
-    const destTargetList = reorderedLists.find((l) => l.id === destListId);
-
-    if (!srcTargetList || !destTargetList) return;
-
-    // const [removedItem] = srcTargetList.cardsOrder.splice(sourceIndex, 1);
-    // destTargetList.cardsOrder.splice(destinationIndex, 0, removedItem);
-
-    // editCard(Number(removedItem), destListId);
-
-    // moveCard(srcListId, srcTargetList.title, srcTargetList.cardsOrder, boardId);
-
-    moveCard(destListId, destTargetList.title, boardId);
+    // editBoard
+    // const reorderedLists = data ? [...data.lists] : [];
+    // const srcTargetList = reorderedLists.find((l) => l.id === srcListId);
+    // const destTargetList = reorderedLists.find((l) => l.id === destListId);
+    // if (!srcTargetList || !destTargetList) return;
+    // // const [removedItem] = srcTargetList.cardsOrder.splice(sourceIndex, 1);
+    // // destTargetList.cardsOrder.splice(destinationIndex, 0, removedItem);
+    // // editCard(Number(removedItem), destListId);
+    // // moveCard(srcListId, srcTargetList.title, srcTargetList.cardsOrder, boardId);
+    // moveCard(destListId, destTargetList.title, boardId);
   };
 
   const handleCardMove = (
@@ -48,20 +46,24 @@ export default function useBoardPage(boardId: number) {
     destinationIndex: number,
     listId: number
   ) => {
-    const reorderedLists = data ? [...data.lists] : [];
+    const reorderedLists = lists ? [...lists] : [];
     const targetList = reorderedLists.find((l) => l.id === listId);
 
     if (!targetList) return;
 
-    // const [removedItem] = targetList.cardsOrder.splice(sourceIndex, 1);
-    // targetList.cardsOrder.splice(destinationIndex, 0, removedItem);
+    // Create a new cardsOrder array to avoid mutation
+    const newCardsOrder = [...targetList.cardsOrder];
+    const [movedCard] = newCardsOrder.splice(sourceIndex, 1); // Remove the card from the source index
+    newCardsOrder.splice(destinationIndex, 0, movedCard); // Insert the card at the destination index
 
-    // moveCard(listId, targetList.title, targetList.cardsOrder, boardId);
+    editList({ listId, data: { cardsOrder: newCardsOrder } });
   };
 
   const handleDragDrop: OnDragEndResponder = (results) => {
     // we get the results from drag and drop
     const { source, destination, type } = results;
+
+    // console.log(results);
 
     if (!destination) return;
 
@@ -78,19 +80,14 @@ export default function useBoardPage(boardId: number) {
     const destListId = Number(destination.droppableId.split("-").at(1));
 
     if (type === "COLUMN") {
-      handleListMove(sourceIndex, destinationIndex);
+      handleListMove(sourceIndex, destinationIndex, srcListId, destListId);
       return;
     } else {
       if (source.droppableId === destination.droppableId) {
         handleCardMove(sourceIndex, destinationIndex, srcListId);
         return;
       } else {
-        handleCardMoveBetweenLists(
-          sourceIndex,
-          destinationIndex,
-          srcListId,
-          destListId
-        );
+        handleCardMoveBetweenLists(sourceIndex, destinationIndex);
         return;
       }
     }
@@ -99,6 +96,8 @@ export default function useBoardPage(boardId: number) {
   return {
     boardData: data,
     loading,
+    lists,
+    listsLoading,
     handleDragDrop,
   };
 }

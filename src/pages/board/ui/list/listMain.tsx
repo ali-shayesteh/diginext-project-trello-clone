@@ -3,17 +3,14 @@ import CardMain from "../card/cardMain";
 import AddCard from "./addCard";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useGetData } from "../../../../shared/api/useGetData";
+import { memo } from "react";
 
-interface ListData extends List {
-  cards: Card[];
-}
-
-const ListMain = ({ data }: { data: List }) => {
+export const ListMain = memo(({ data }: { data: List }) => {
   const { id } = data;
 
-  const { data: list, loading } = useGetData<ListData>("/api/lists/" + id);
-
-  if (loading) <>loading...</>;
+  const { data: cards, loading: cardsLoading } = useGetData<Card[]>(
+    "/api/lists/" + id + "/cards"
+  );
 
   return (
     <div>
@@ -41,9 +38,12 @@ const ListMain = ({ data }: { data: List }) => {
                   ref={provided.innerRef}
                 >
                   {/* Map through listsOrder to render each list */}
-                  {list &&
-                    list.cards.length > 0 &&
-                    list.cards.map((card: Card, index: number) => {
+                  {cardsLoading ? (
+                    <div>loading...</div>
+                  ) : (
+                    cards &&
+                    cards.length > 0 &&
+                    cards.map((card: Card, index: number) => {
                       // const card = cards.find((c: Card) => c.id === cardId);
 
                       return (
@@ -66,7 +66,8 @@ const ListMain = ({ data }: { data: List }) => {
                           </Draggable>
                         )
                       );
-                    })}
+                    })
+                  )}
                 </div>
                 {provided.placeholder}
               </div>
@@ -74,11 +75,9 @@ const ListMain = ({ data }: { data: List }) => {
           </Droppable>
         </main>
         <footer className="mt-2">
-          {id && data && <AddCard listId={id} boardId={data.id} />}
+          {id && data && <AddCard listId={id} boardId={data.board_id} />}
         </footer>
       </div>
     </div>
   );
-};
-
-export default ListMain;
+});

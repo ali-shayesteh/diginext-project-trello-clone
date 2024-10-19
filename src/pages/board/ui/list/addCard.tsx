@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import TextArea from "../../../../shared/ui/textArea";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useBoardDataCreateCard } from "../../api/useBoardData";
+import { Card } from "../../../../config/types";
 
 type FormValues = {
   title: string;
@@ -26,10 +27,15 @@ const AddCard = ({ listId, boardId }: AddCardType) => {
     setFocus("title");
   };
 
-  const createCard = useBoardDataCreateCard(boardId, listId, createCardSuccess);
+  const createCard = useBoardDataCreateCard(listId, boardId, createCardSuccess);
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const newCard = { ...data, list_id: listId };
+    const newCard: Partial<Card> = {
+      ...data,
+      list_id: Number(listId),
+      description: "",
+    };
+
     createCard(newCard);
   };
 

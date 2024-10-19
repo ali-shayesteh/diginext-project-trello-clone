@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 
 export const axiosInstance = axios.create({
   // baseURL: 'https://some-domain.com/api/',
@@ -6,22 +6,33 @@ export const axiosInstance = axios.create({
   // headers: {'X-Custom-Header': 'foobar'}
 });
 
-export const fetchData = (url: string) =>
-  axiosInstance(url).then((res) => res.data);
+async function apiRequest<T>(
+  url: string,
+  method: "get" | "post" | "put",
+  data = {},
+  params = {},
+  headers = {}
+): Promise<T> {
+  const config: AxiosRequestConfig = {
+    url,
+    method,
+    data,
+    params,
+    headers,
+  };
+  const response = await axiosInstance.request<T>(config);
+  return response.data;
+}
 
 export const apiService = {
-  createData: async <T>(url: string, data: T): Promise<T> => {
-    const response = await axiosInstance.post<T>(url, data);
-    return response.data;
+  createData: async <T>(url: string, data: Partial<T>): Promise<T> => {
+    return apiRequest<T>(url, "post", data);
   },
 
-  getData: async <T>(url: string): Promise<T> => {
-    const response = await axiosInstance.get<T>(url);
-    return response.data;
+  getData: async <T>(url: string, params?: object): Promise<T> => {
+    return apiRequest<T>(url, "get", {}, params);
   },
-
-  editData: async <T>(url: string, data: T): Promise<T> => {
-    const response = await axios.put<T>(url, data);
-    return response.data;
+  editData: async <T>(url: string, data: Partial<T>): Promise<T> => {
+    return apiRequest<T>(url, "put", data);
   },
 };

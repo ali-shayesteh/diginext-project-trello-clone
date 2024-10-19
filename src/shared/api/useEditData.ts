@@ -21,7 +21,7 @@ export default function useEditData<T>(
   onSettled?: () => void
 ) {
   const mutateData = useMutation({
-    mutationFn: ({ id, newData }: { id: number; newData: T }) =>
+    mutationFn: ({ id, newData }: { id: number; newData: Partial<T> }) =>
       apiService.editData(url + id, newData),
 
     onSuccess: (data, variables) => {

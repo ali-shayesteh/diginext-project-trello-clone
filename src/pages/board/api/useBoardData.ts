@@ -1,9 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Board, Card, List } from "../../../config/types";
-import useCreateData from "../../../shared/api/useCreateData";
-import useEditData from "../../../shared/api/useEditData";
+import useMutateData from "../../../shared/api/useMutateData";
 
-type BoardVariables = { id: number; newData: Board };
+type BoardVariables = { id: number; data: Partial<Board> };
 
 export default function useBoardData(boardId: number) {
   const queryClient = useQueryClient();
@@ -14,10 +13,7 @@ export default function useBoardData(boardId: number) {
     const previous: Board | undefined = queryClient.getQueryData([
       "/api/boards/" + boardId,
     ]);
-    queryClient.setQueryData(
-      ["/api/boards/" + boardId],
-      () => variables.newData
-    );
+    queryClient.setQueryData(["/api/boards/" + boardId], () => variables.data);
 
     return { previous };
   };
@@ -34,117 +30,103 @@ export default function useBoardData(boardId: number) {
     queryClient.invalidateQueries({ queryKey: ["/api/boards/" + boardId] });
   };
 
-  const mutateBoard = useEditData<Board>(
-    "api/boards/",
-    () => null,
-    mutateBoardMutate,
-    mutateBoardError,
-    mutateBoardSettled
-  );
+  const mutateBoard = useMutateData<Board>({
+    url: "api/boards/",
+    type: "edit",
+    onMutate: mutateBoardMutate,
+    onError: mutateBoardError,
+    onSettled: mutateBoardSettled,
+  });
 
-  const mutateListSuccess = (variables: { id: number; newData: List }) => {
-    queryClient.invalidateQueries({
-      queryKey: ["/api/boards/" + boardId],
-    });
-    queryClient.invalidateQueries({
-      queryKey: ["lists", variables.id],
-    });
-  };
-
-  const mutateList = useEditData<List>("api/lists/", mutateListSuccess);
-
-  const mutateCardSuccess = (variables: {
-    id: number;
-    newData: { listId: number };
-  }) => {
-    queryClient.invalidateQueries({
-      queryKey: ["lists", variables.newData.listId],
-    });
-  };
-  const mutateCard = useEditData<{ listId: number }>(
-    "api/card/",
-    mutateCardSuccess
-  );
-
-  const moveList = (
-    id: number,
-    reorderedLists: number[],
-    title: string,
-    lists: List[]
-  ) => {
-    mutateBoard({
-      id,
-      newData: {
-        listsOrder: reorderedLists,
-        title,
-        lists,
-      },
-    });
-  };
-
-  const moveCard = (id: number, title: string, boardId: number) => {
-    mutateList({
-      id,
-      newData: {
-        title,
-        board_id: boardId,
-      },
-    });
-  };
-
-  const editCard = (id: number, listId: number) => {
-    mutateCard({
-      id,
-      newData: { listId },
-    });
+  const editBoard = (data: Partial<Board>) => {
+    mutateBoard({ data, id: boardId });
   };
 
   return {
-    editCard,
-    moveCard,
-    moveList,
-    boardId,
+    editBoard,
   };
 }
 
-export function useBoardDataCreateList(boardId: number, onSuccess: () => void) {
+export function useBoardDataInvalidateQuery(key: string) {
   const queryClient = useQueryClient();
 
-  const createList = useCreateData<List>(
-    "/api/lists",
-    () => {
-      onSuccess();
-      queryClient.invalidateQueries({
-        queryKey: ["/api/boards/" + boardId],
-      });
-    },
-    () => null
+  const invalidateQuery = (param?: string) => {
+    queryClient.invalidateQueries({
+      queryKey: param ? [key + param] : [key],
+    });
+  };
+
+  return invalidateQuery;
+}
+
+export function useBoardDataCreateList(boardId: number, onSuccess: () => void) {
+  const invalidateBoardData = useBoardDataInvalidateQuery(
+    "/api/boards/" + boardId + "/lists"
   );
 
-  return createList.mutate;
+  const createList = useMutateData<List>({
+    type: "create",
+    url: "/api/lists/",
+    onSuccess: () => {
+      onSuccess();
+      invalidateBoardData();
+    },
+  });
+
+  return createList;
+}
+
+export function useBoardDataEditList(onSuccess: () => void) {
+  const invalidateListData = useBoardDataInvalidateQuery("/api/lists/");
+
+  const mutateList = useMutateData<List>({
+    type: "edit",
+    url: "/api/lists/",
+    onSuccess: (variables) => {
+      onSuccess();
+      invalidateListData(variables.id + "/cards");
+    },
+  });
+
+  const editList = ({
+    data,
+    listId,
+  }: {
+    data: Partial<List>;
+    listId: number;
+  }) => {
+    mutateList({ data, id: listId });
+  };
+
+  return editList;
 }
 
 export function useBoardDataCreateCard(
-  boardId: number,
   listId: number,
+  boardId: number,
   onSuccess: () => void
 ) {
-  const queryClient = useQueryClient();
-
-  const createList = useCreateData<Card>(
-    "/api/cards",
-    () => {
-      onSuccess();
-      queryClient.invalidateQueries({
-        queryKey: ["/api/boards/" + boardId],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["/api/lists/" + listId],
-      });
-    },
-    () => null
+  const invalidateListData = useBoardDataInvalidateQuery(
+    "/api/lists/" + listId + "/cards"
   );
 
-  return createList.mutate;
+  const invalidateBoardData = useBoardDataInvalidateQuery(
+    "/api/boards/" + boardId + "/lists"
+  );
+
+  const mutateCard = useMutateData<Card>({
+    url: "/api/cards/",
+    type: "create",
+    onSuccess: () => {
+      onSuccess();
+      invalidateListData();
+      invalidateBoardData();
+    },
+  });
+
+  const createCard = (data: Partial<List>) => {
+    mutateCard({ data, id: listId });
+  };
+
+  return createCard;
 }

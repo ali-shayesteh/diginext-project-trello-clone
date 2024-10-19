@@ -1,5 +1,5 @@
 import { List } from "../../../config/types";
-import ListMain from "./list/listMain";
+import { ListMain } from "./list/listMain";
 import AddList from "./addList";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import useBoardPage from "./useBoardPage";
@@ -7,7 +7,8 @@ import useBoardPage from "./useBoardPage";
 export const BoardPage = () => {
   const boardId = 1;
 
-  const { loading, boardData, handleDragDrop } = useBoardPage(boardId);
+  const { loading, boardData, handleDragDrop, lists, listsLoading } =
+    useBoardPage(boardId);
 
   return (
     <div className="h-full bg-[#92baeb]">
@@ -33,19 +34,17 @@ export const BoardPage = () => {
                     {(provided) => (
                       <div
                         className="flex gap-3"
-                        // style={{
-                        //   width: boardData.listsOrder
-                        //     ? boardData.listsOrder.length * 300 - 12
-                        //     : "auto",
-                        // }}
                         {...provided.droppableProps}
                         ref={provided.innerRef}
                       >
                         {/* Map through listsOrder to render each list */}
 
-                        {boardData.lists &&
-                          boardData.lists.length > 0 &&
-                          boardData.lists.map((list: List, index: number) => {
+                        {listsLoading ? (
+                          <div>loading...</div>
+                        ) : (
+                          lists &&
+                          lists.length > 0 &&
+                          lists.map((list: List, index: number) => {
                             if (!list) {
                               return <>Not Found</>;
                             }
@@ -67,7 +66,8 @@ export const BoardPage = () => {
                                 )}
                               </Draggable>
                             );
-                          })}
+                          })
+                        )}
                         {provided.placeholder}
                       </div>
                     )}
